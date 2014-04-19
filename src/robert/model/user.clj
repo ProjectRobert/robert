@@ -2,6 +2,7 @@
   (:require [monger.core :refer [connect! set-db! get-db]]
             [monger.collection :as mc]
             [monger.joda-time]
+            [monger.operators :refer :all]
             [cemerick.friend.credentials :as creds]
             [noir.validation :as v])
   (:require [robert.utils :as u]))
@@ -11,52 +12,107 @@
 
 (alter-var-root (var v/*errors*) (fn [_] (atom {})))
 
-(defn new-collection [name]
-  (mc/create name))
+(defn uuid [] (str (java.util.UUID/randomUUID)))
+
+(def collection-fields 
+      [:email :crypted_password 
+       :activation_code :activation_code_created_at
+       :password_reset_code :password_reset_code_created_at :new_password_requested
+       :new_requested_email :email_change_code :email_change_code_created_at
+       :created_at :updated_at])
+
+(defn- unique? [collection {:keys [record value] :as map-values}]
+  (if-not (mc/find-one-as-map collection map-values)
+    true
+    false))
+
+(defn- find-user-login [collection email]
+  (mc/find-one-as-map collection {:email email
+                                  :activation_code nil}))
+
+(defn- find [collection query]
+  (mc/find-maps collection query))
+
+(defn fetch [collection query & {:keys [multiple] :or [multiple false]}]
+  (if multiple
+    (mc/find-maps collection query)
+    (mc/find-one-as-map collection query)))
 
 (defn- new-secure-code [collection]
-  (first (filter #(u/unique? collection {:$or [{:activation_code %}
-                                             {:email_change_code %}
-                                             {:password_reset_code %}]})
-                 (repeatedly u/uuid))))
+  (first (filter #(unique? collection {$or [{:activation_code %}
+                                            {:email_change_code %}
+                                            {:password_reset_code %}]})
+                 (repeatedly uuid))))
 
-(defn new! [collection {:keys [email password username] :as user}]
-  (if (u/unique? collection {:email email})
-    (if (u/unique? collection {:username username})
-      (let [save-user (dissoc user :password)]
-        (mc/insert-and-return collection
-                              (merge save-user
-                                     {:password (when password (creds/hash-bcrypt password))
-                                      :activation_code (new-secure-code collection)
-                                      :creation_time u/now
-                                      :last_seen u/now})))
-      (do (v/set-error! :registration :not-valid-username)
-          :not-valid-username))
-    (do (v/set-error! :registration :not-valid-email)
-        :not-valid-email)))
+(defn valid? [collection email]
+  (unique? collection {:email email}))
 
-(defn get-user [collection query]
-  (let [results (mc/find-maps collection query)]
-    results))
+(defn user-login [collection creds-map]
+  (println "attemp login => " creds-map)
+  (when-let [user (find-user-login collection (:username creds-map))]
+    (user)))
 
-(defn set-values! [collection query values]
-  (let [results (get collection query)]
-    (doall
-     (map
-      (fn [r] (mc/save-and-return collection (merge r values)))
-      results))))
+(defn ask-change-email! [collection email new-email password]
+  (let [user (mc/find-one-as-map collection {:email email})]
+    (if (creds/bcrypt-verify password (:password user))
+      (mc/save-and-return collection
+                          (merge user
+                                 {:email_change_code (new-secure-code)
+                                  :email_change_code_created_at u/now
+                                  :new_requested_email new-email}))
+      (v/set-error :change-email :wrong-password))))
 
-(defn remove! [collection query]
-  (mc/remove collection query))
+(defn change-email! [collection reset-code]
+   (if-let [user (mc/find-one-as-map collection {:email_change_code
+                                                reset-code})]
+     (mc/update-by-id collection (:_id user)
+               {$set {:email (:new_requested_email user)}
+                $unset  {:email_change_code 1
+                          :email_change_code_created_at 1
+                          :new_requested_email 1}})
+     (v/set-error :code :not-valid-email-code)))
 
-(defn check [collection query password]
-  (let [user (first (get-user collection query))]
-    (if-let [pass (:password user)]
-      (creds/bcrypt-verify password pass)
-      true)))
+(defn ask-change-password! [collection email new-password password]
+   (let [user (mc/find-one-as-map collection {:email email})]
+     (if (creds/bcrypt-verify password (:password user))
+       (mc/save-and-return collection
+                           (merge user
+                                  {:password_reset_code (new-secure-code)
+                                   :password_reset_code_created_at u/now
+                                   :new_password_requested (creds/hash-bcrypt new-password)}))
+      (v/set-error :change-password :wrong-password))))
+
+(defn change-password! [collection reset-code]
+  (if-let [user (mc/find-one-as-map collection {:password_reset_code
+                                              reset-code})]
+    (mc/update-by-id collection (:_id user)
+               {$set {:password (:new_password_requested user)}
+                $unset {:password_reset_code 1
+                         :password_reset_code_created_at 1
+                         :new_password_requested 1}})
+    (v/set-error :code :not-valid-password-code)))
+
+(defn new! [collection {:keys [email password] :as p}]
+  (if-let [valid-email? (valid? collection email)]
+    (let [activaction-code (new-secure-code collection)
+          user (mc/insert-and-return collection
+                                     (assoc p :password
+                                            (creds/hash-bcrypt password)))
+          _ (println "into_new user=> " user)]
+      (dissoc user :password))
+    :not-valid-email))
+
+(defn login [collection email password]
+  (when-let [user (fetch collection {:email email
+                                     :activation_code nil})]
+    (when (creds/bcrypt-verify password (:password user))
+      (dissoc user :password))))
 
 (defn verify-email! [collection code]
   (if-let [user (mc/find-one-as-map collection {:activation_code code})]
-    (mc/update-by-id "users" (:_id user) {:$unset {:activation_code 1
-                                                   :activation_code_created_at 1}})
+    (mc/update-by-id collection (:_id user) {$unset {:activation_code 1
+                                                     :activation_code_created_at 1}})
     (v/set-error :code :not-valid-validation-code)))
+
+(defn remove! [collection email]
+  (mc/remove collection {:email email}))
