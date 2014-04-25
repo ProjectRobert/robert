@@ -3,6 +3,8 @@
   :url "http://example.com/FIXME"
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [compojure "1.1.6"]
+                 [ring/ring-core "1.2.2"]
+                 [ring-basic-authentication "1.0.5"]
                  [com.novemberain/monger "1.7.0"]
                  [com.cemerick/friend "0.2.0"]
                  [clj-time "0.6.0"]

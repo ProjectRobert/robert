@@ -19,8 +19,8 @@
 ;; :remove! remove everything
 
 (defresource get-user
-  :allowed-methods [:get :post]
-  :available-media-types ["application/json" "text/html"]
+  :allowed-methods [:get]
+  :available-media-types ["application/json"]
   :authorized? (fn [ctx]
                  (let [username (get-in ctx [:request :params :name])
                        password (get-in ctx [:request :params :secret])]
@@ -38,6 +38,7 @@
   :allowed-methods [:post]
   :available-media-types ["application/json"]
   :malformed? (fn [ctx]
+                (println ctx)
                 (let [email (get-in ctx [:request :form-params "email"])
                       pass (get-in ctx [:request :form-params "password"])]
                   (if (nil? email)
@@ -47,27 +48,31 @@
                       false))))
   :handle-malformed (fn [ctx]
                       (generate-string (:malformed-reason ctx)))
-  :authorized? (fn [ctx]
-                 (let [username (get-in ctx [:request :params :name])
-                       password (get-in ctx [:request :params :secret])]
+  :authorized? (fn [{req :request}]
+                 (let [username (get-in req [:basic-authentication :username])
+                       password (get-in req [:basic-authentication :password])]
+                   ;; (if-let [user (friend/authorized? [:user] (friend/identity req))]
+                   ;;   {:user user}
+                   ;;   [false {:unauthorized {:message (format "Not find the couple name: %s secret: %s" username password)}}]
+                   
                    (if-let [user (user/login "robert" username password)]
                      {:user user}
                      [false {:unauthorized {:message (format "Not find the couple name: %s secret: %s" username password)}}])))
+  
   :handle-unauthorized (fn [ctx]
                          (generate-string (:unauthorized ctx)))
   :allowed? (fn [ctx]
-             (let [collection (get-in ctx [:user :collection])
-                   new-username-email (get-in ctx [:request :form-params "email"])]
-               (if (user/valid? collection new-username-email)
-                 true
-                 [false {:forbidden {:message "Email already present"
-                                     :email new-username-email}}])))
+              (let [collection (get-in ctx [:user :collection])
+                    new-username-email (get-in ctx [:request :form-params "email"])]
+                (if (user/valid? collection new-username-email)
+                  true
+                  [false {:forbidden {:message "Email already present"
+                                      :email new-username-email}}])))
   :handle-forbidden (fn [ctx]
                       (generate-string (:forbidden ctx)))
   :post! (fn [ctx]
            (let [user-data (get-in ctx [:request :form-params])
-                 collection (get-in ctx [:user :collection])
-                 _ (println user-data)]
+                 collection (get-in ctx [:user :collection])]
              {:created-user (user/new! collection user-data)}))
   :handle-created (fn [ctx]
                     (generate-string (-> ctx :created-user
