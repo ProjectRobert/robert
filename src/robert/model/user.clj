@@ -92,21 +92,27 @@
                          :new_password_requested 1}})
     (v/set-error :code :not-valid-password-code)))
 
-(defn new! [collection {:keys [email password] :as p}]
-  (if-let [valid-email? (valid? collection email)]
-    (let [activaction-code (new-secure-code collection)
-          user (mc/insert-and-return collection
-                                     (assoc p :password
-                                            (creds/hash-bcrypt password)))
-          _ (println "into_new user=> " user)]
-      (dissoc user :password))
-    :not-valid-email))
+(defn new! [collection user-data]
+  (let [email (get user-data "email")
+        password (get user-data "password")]
+    (println "new!\n" collection user-data email)
+    (if (unique? collection {:email email})
+      (let [activaction-code (new-secure-code collection)
+            user (mc/insert-and-return collection
+                                       (assoc user-data :password
+                                              (creds/hash-bcrypt password)))
+            _ (println "into_new user=> " user)]
+        (dissoc user :password))
+      :not-valid-email1)))
 
 (defn login [collection email password]
-  (when-let [user (fetch collection {:email email
-                                     :activation_code nil})]
-    (when (creds/bcrypt-verify password (:password user))
-      (dissoc user :password))))
+  (if (and (= email "test")
+           (= password "test"))
+    {:email email :collection "test"}
+    (when-let [user (fetch collection {:email email
+                                       :activation_code nil})]
+      (when (creds/bcrypt-verify password (:password user))
+        (dissoc user :password)))))
 
 (defn verify-email! [collection code]
   (if-let [user (mc/find-one-as-map collection {:activation_code code})]

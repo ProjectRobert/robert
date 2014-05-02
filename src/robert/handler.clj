@@ -2,8 +2,10 @@
   (:use compojure.core)
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
+            [ring.middleware.json :refer [wrap-json-params]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
             [ring.middleware.basic-authentication :refer [wrap-basic-authentication]]
+            [liberator.dev :refer [wrap-trace]]
 
             [robert.routes.rest-api :refer [robert]]
             [robert.model.user :refer [login]]))
@@ -11,7 +13,8 @@
 (def secure-robert
   (-> robert
       (wrap-basic-authentication (fn [user password]
-                                          {:user user :password password}))))
+                                   (println user password)
+                                   {:username user :password password}))))
 
 (defroutes app-routes
   (GET "/" [] "Hello World")
@@ -21,4 +24,6 @@
 
 (def app (-> app-routes
              wrap-multipart-params
-             handler/site))
+             wrap-json-params
+             handler/site
+             (wrap-trace :header :ui)))
