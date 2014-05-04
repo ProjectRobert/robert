@@ -93,14 +93,14 @@
 
 (defn new! [collection user-data]
   (let [email (get user-data "email")
+        name (get user-data "username")
         password (get user-data "password")]
     (println "new!\n" collection user-data email)
     (if (unique? collection {:email email})
       (let [activaction-code (new-secure-code collection)
             user (mc/insert-and-return collection
                                        (assoc user-data :password
-                                              (creds/hash-bcrypt password)))
-            _ (println "into_new user=> " user)]
+                                              (creds/hash-bcrypt password)))]
         (dissoc user :password))
       :not-valid-email1)))
 
