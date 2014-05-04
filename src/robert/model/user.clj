@@ -26,9 +26,8 @@
     true
     false))
 
-(defn- find-user-login [collection email]
-  (mc/find-one-as-map collection {:email email
-                                  :activation_code nil}))
+(defn- find-user-login [collection query]
+  (mc/find-one-as-map collection (assoc query :activation_code nil)))
 
 (defn- find [collection query]
   (mc/find-maps collection query))
@@ -50,7 +49,7 @@
 (defn user-login [collection creds-map]
   (println "attemp login => " creds-map)
   (when-let [user (find-user-login collection (:username creds-map))]
-    (user)))
+    user))
 
 (defn ask-change-email! [collection email new-email password]
   (let [user (mc/find-one-as-map collection {:email email})]

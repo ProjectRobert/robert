@@ -12,13 +12,24 @@
 
 ;; I will keep unique the field :email and :username
 
+(def authorization
+  {:fn (fn [{req :request}]
+         (let [username (get-in req [:basic-authentication :username])
+               password (get-in req [:basic-authentication :password])]
+           (if-let [user (user/login "robert" username password)]
+             {:user user}
+             [false {:unauthorized {:message (format "Could not log in, check again username and password.")
+                                    :username username}}])))
+   :handle (fn [ctx]
+             (generate-string (:unauthorized ctx)))})
+
 (defn make-entity-json-friendly [entity]
   (-> entity
       (update-in [:_id] str)
       (dissoc :password "password")))
 
 (defresource get-user
-  :allowed-methods [:get]
+  :allowed-methods #{:get}
   :available-media-types ["application/json"]
   :malformed? (fn [ctx]
                 (println ctx)
@@ -29,18 +40,11 @@
                     (if-let [username (get q-params "username")]
                       [false {:query
                               {:username username}}]
-                      [true {:malformed {:message "You need to pass or the email or the username"}}]))))
+                      [true {:malformed {:message "You need to provide or the email or the username"}}]))))
   :handle-malformed (fn [ctx]
                       (generate-string (:malformed ctx)))
-  :authorized? (fn [{req :request}]
-                 (let [username (get-in req [:basic-authentication :username])
-                       password (get-in req [:basic-authentication :password])]
-                   (if-let [user (user/login "robert" username password)]
-                     {:user user}
-                     [false {:unauthorized {:message (format "Could not log in, check again username and password.")
-                                            :username username}}])))
-  :handle-unauthorized (fn [ctx]
-                         (generate-string (:unauthorized ctx)))
+  :authorized? (:fn authorization)
+  :handle-unauthorized (:handle authorization)
   :exists? (fn [ctx]
              (if-let [user (user/fetch (-> ctx :user :collection)
                                        (-> ctx :query))]
@@ -55,7 +59,7 @@
                                     make-entity-json-friendly) {:pretty-print true})))
 
 (defresource new-user
-  :allowed-methods [:post]
+  :allowed-methods #{:post}
   :available-media-types ["application/json"]
   :malformed? (fn [ctx]
                 (let [email (get-in ctx [:request :json-params "email"])
@@ -67,15 +71,8 @@
                       false))))
   :handle-malformed (fn [ctx]
                       (generate-string (:malformed ctx)))
-  :authorized? (fn [{req :request}]
-                 (let [username (get-in req [:basic-authentication :username])
-                       password (get-in req [:basic-authentication :password])]
-                   (if-let [user (user/login "robert" username password)]
-                     {:user user}
-                     [false {:unauthorized {:message (format "Could not log in, check again username and password.")
-                                            :username username}}])))
-  :handle-unauthorized (fn [ctx]
-                         (generate-string (:unauthorized ctx)))
+  :authorized? (:fn authorization)
+  :handle-unauthorized (:handle authorization)
   :allowed? (fn [ctx]
               (let [collection (get-in ctx [:user :collection])
                     new-username-email (get-in ctx [:request :json-params "email"])]
@@ -93,6 +90,26 @@
                     (generate-string (-> ctx :created-user
                                          make-entity-json-friendly))))
 
+(defresource login
+  :allowed-methods #{:post}
+  :available-media-types ["application/json"]
+  :malformed? (fn [ctx]
+                (let [user-value (get-in ctx [:request :json-params "login"])]
+                  (if (and (or (contains? user-value "email")
+                               (contains? user-value "username"))
+                           (contains? user-value "password"))
+                    [false {:login user-value}]
+                    [true {:malformed {:message "You need to provide the key \"login\"."}}])))
+  :handle-malformed (fn [ctx]
+                      (generate-string (:malformed ctx)))
+  :authorized? (:fn authorization)
+  :handle-unauthorized (:handle authorization)
+  :new? false
+  :respond-with-entity? true
+  :handle-ok (fn [ctx]
+               (let [specific-user (-> ctx :login)
+                     query (select-keys specific-user [:password :email :username])]
+                 (generate-string (-> ctx :login)))))
 
 (defroutes confirm-code
   (GET "/validate/:code" [code]
@@ -136,5 +153,6 @@
 (defroutes robert
   (ANY "/get-user" params get-user)
   (ANY "/new-user" params new-user)
+  (ANY "/login" params login)
   (context "/confirm" [] confirm-code)
   (context "/change" [] change))
