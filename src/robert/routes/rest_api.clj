@@ -13,13 +13,13 @@
 ;; I will keep unique the field :email and :username
 
 (def authorization
-  {:fn (fn [{req :request}]
-         (let [username (get-in req [:basic-authentication :username])
-               password (get-in req [:basic-authentication :password])]
-           (if-let [user (user/login "robert" username password)]
-             {:user user}
-             [false {:unauthorized {:message (format "Could not log in, check again username and password.")
-                                    :username username}}])))
+  {:fn (fn [key] (fn [{req :request}]
+                   (let [username (get-in req [:basic-authentication :username])
+                         password (get-in req [:basic-authentication :password])]
+                     (if-let [user (user/login "robert" username password)]
+                       {key user}
+                       [false {:unauthorized {:message (format "Could not log in, check again username and password.")
+                                              :username username}}]))))
    :handle (fn [ctx]
              (generate-string (:unauthorized ctx)))})
 
@@ -43,7 +43,7 @@
                       [true {:malformed {:message "You need to provide or the email or the username"}}]))))
   :handle-malformed (fn [ctx]
                       (generate-string (:malformed ctx)))
-  :authorized? (:fn authorization)
+  :authorized? ((:fn authorization) :user)
   :handle-unauthorized (:handle authorization)
   :exists? (fn [ctx]
              (if-let [user (user/fetch (-> ctx :user :collection)
@@ -71,7 +71,7 @@
                       false))))
   :handle-malformed (fn [ctx]
                       (generate-string (:malformed ctx)))
-  :authorized? (:fn authorization)
+  :authorized? ((:fn authorization) :user)
   :handle-unauthorized (:handle authorization)
   :allowed? (fn [ctx]
               (let [collection (get-in ctx [:user :collection])
