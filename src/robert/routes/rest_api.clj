@@ -6,9 +6,9 @@
             [cemerick.friend :as friend]
             [liberator.core :refer [defresource resource]]
             [cheshire.core :refer [generate-string]])
+
   (:require [robert.model.user :as user]
             [robert.model.change-setting :as change-settings]))
-
 
 ;; I will keep unique the field :email and :username
 
@@ -16,7 +16,7 @@
   {:fn (fn [key] (fn [{req :request}]
                    (let [username (get-in req [:basic-authentication :username])
                          password (get-in req [:basic-authentication :password])]
-                     (if-let [user (user/login "robert" username password)]
+                     (if-let [user (user/login "robert" {:username username :password password})]
                        {key user}
                        [false {:unauthorized {:message (format "Could not log in, check again username and password.")
                                               :username username}}]))))
@@ -75,7 +75,8 @@
   :handle-unauthorized (:handle authorization)
   :allowed? (fn [ctx]
               (let [collection (get-in ctx [:user :collection])
-                    new-username-email (get-in ctx [:request :json-params "email"])]
+                    new-username-email (get-in ctx [:request :json-params])]
+                (println collection new-username-email)
                 (if (user/valid? collection new-username-email)
                   true
                   [false {:forbidden {:message "Email already present"
@@ -98,18 +99,27 @@
                   (if (and (or (contains? user-value "email")
                                (contains? user-value "username"))
                            (contains? user-value "password"))
-                    [false {:login user-value}]
+                    [false {:login-creds user-value}]
                     [true {:malformed {:message "You need to provide the key \"login\"."}}])))
   :handle-malformed (fn [ctx]
                       (generate-string (:malformed ctx)))
-  :authorized? (:fn authorization)
+  :authorized? ((:fn authorization) :user)
   :handle-unauthorized (:handle authorization)
+  :exists? (fn [ctx]
+             (println (-> ctx :login-creds)
+                      (-> ctx :user :collection))
+             (if-let [user (user/login (-> ctx :user :collection) (:login-creds ctx))]
+               (do
+                 (println user)
+                 [true {:login user}])
+               false))
   :new? false
   :respond-with-entity? true
   :handle-ok (fn [ctx]
                (let [specific-user (-> ctx :login)
                      query (select-keys specific-user [:password :email :username])]
-                 (generate-string (-> ctx :login)))))
+                 (println (:login ctx))
+                 (generate-string (-> ctx :login make-entity-json-friendly)))))
 
 (defroutes confirm-code
   (GET "/validate/:code" [code]
