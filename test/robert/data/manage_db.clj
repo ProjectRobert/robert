@@ -2,7 +2,9 @@
   (:require [monger.core :refer [connect! set-db! get-db]]
             [monger.collection :as mc]
 
-            [robert.data.data :as data]))
+            ;; [robert.data.data :as data]
+
+            ))
 
 (defn create-document [name]
   (mc/create name {}))
