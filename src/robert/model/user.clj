@@ -4,7 +4,8 @@
             [monger.joda-time]
             [monger.operators :refer :all]
             [cemerick.friend.credentials :as creds]
-            [noir.validation :as v])
+            [noir.validation :as v]
+            [clj-time.core :as t])
   (:require [robert.utils :as u]))
 
 (connect!)
@@ -139,3 +140,5 @@
         (do (println "ok")
             (dissoc user :password))))))
 
+(defn add-last-login [collection user]
+  (mc/update-by-id collection (:_id user) {$set {:last-login (t/now)}}))
