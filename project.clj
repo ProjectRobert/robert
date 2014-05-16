@@ -7,7 +7,7 @@
                  [ring/ring-core "1.2.2"]
                  [ring/ring-json "0.3.1"]
                  [ring-basic-authentication "1.0.5"]
-                 [com.novemberain/monger "1.7.0"]
+                 [com.novemberain/monger "2.0.0-rc1"]
                  [com.cemerick/friend "0.2.0"]
                  [clj-time "0.6.0"]
                  [lib-noir "0.8.1"]
