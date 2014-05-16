@@ -142,3 +142,9 @@
 
 (defn add-last-login [collection user]
   (mc/update-by-id collection (:_id user) {$set {:last-login (t/now)}}))
+
+(defn update-document
+  ([collection old-document delta]
+     (update-document collection (merge old-document delta)))
+  ([collection new-document]
+     (mc/save-and-return collection new-document)))

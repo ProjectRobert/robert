@@ -1,5 +1,5 @@
 (ns robert.routes.rest-api
-  (:require [compojure.core :refer [defroutes GET POST context ANY]]
+  (:require [compojure.core :refer [defroutes GET POST context ANY PATCH]]
             [compojure.handler :as handler]
             [compojure.route :as route]
             [noir.validation :as vali]
@@ -120,7 +120,7 @@
                  (generate-string (-> ctx :login make-entity-json-friendly)))))
 
 (defresource change-values
-  :allowed-methods #{:post}
+  :allowed-methods #{:patch}
   :available-media-types ["application/json"]
   :malformed? (fn [ctx]
                 (let [query (get-in ctx [:request :json-params "query"])
@@ -136,7 +136,17 @@
                       (generate-string (:malformed ctx)))
   :authorized? ((:fn authorization) :user)
   :handle-unauthorized (:handle authorization)
+  :exists? (fn [ctx]
+             (if-let [users (user/fetch (-> ctx :user :collection)
+                                        (-> ctx :query)
+                                        :multiple true)]
+               [true {:query-result users}]
+               [false {:not-found {:message "Not found any element that satisfy the query."
+                                   :query (ctx :query)}}] ))
+  :handle-not-found (fn [ctx]
+                      (generate-string (:not-found ctx)))
   :new? false
+  :post! (fn [ctx])
   :respond-with-entity? true
   :handle-ok (fn [ctx]
                (generate-string {:query (:query ctx) :new-values (:new-values ctx)})))
@@ -184,6 +194,6 @@
   (ANY "/get-user" params get-user)
   (ANY "/new-user" params new-user)
   (ANY "/login" params login)
-  (ANY "/set" params change-values)
+  (PATCH "/set" params change-values)
   (context "/confirm" [] confirm-code)
   (context "/change" [] change))
