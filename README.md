@@ -18,7 +18,7 @@ There is a lot of boilerplate code, stuff like change password, recover account,
 
 Also there is a security concern, if you are not an expert about web security chances are that your management system is going to just work, without too many thoughts about security itself.
 
-The idea of Stormpath is great, they just do one, single thing and they are great.
+The idea of Stormpath works well, the team is great and highy specialised in it.
 
 However I don't love the idea that the code of Stormpath is not open.
 
