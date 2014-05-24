@@ -45,7 +45,7 @@
   :authorized? ((:fn authorization) :user)
   :handle-unauthorized (:handle authorization)
   :exists? (fn [ctx]
-             (if-let [user (user/fetch (-> ctx :user :collection)
+             (if-let [user (user/fetch (-> ctx :user :database)
                                        (-> ctx :query))]
                [true {:result user}]
                false))
@@ -73,10 +73,10 @@
   :authorized? ((:fn authorization) :user)
   :handle-unauthorized (:handle authorization)
   :allowed? (fn [ctx]
-              (let [collection (get-in ctx [:user :collection])
+              (let [database (get-in ctx [:user :database])
                     new-username-email (get-in ctx [:request :json-params])]
-                (println collection new-username-email)
-                (if (user/valid? collection new-username-email)
+                (println database new-username-email)
+                (if (user/valid? database new-username-email)
                   true
                   [false {:forbidden {:message "Email already present"
                                       :email new-username-email}}])))
@@ -84,8 +84,8 @@
                       (generate-string (:forbidden ctx)))
   :post! (fn [ctx]
            (let [user-data (get-in ctx [:request :json-params])
-                 collection (get-in ctx [:user :collection])]
-             {:created-user (user/new! collection user-data)}))
+                 database (get-in ctx [:user :database])]
+             {:created-user (user/new! database user-data)}))
   :handle-created (fn [ctx]
                     (generate-string (-> ctx :created-user
                                          make-entity-json-friendly))))
@@ -106,8 +106,8 @@
   :handle-unauthorized (:handle authorization)
   :exists? (fn [ctx]
              (println (-> ctx :login-creds)
-                      (-> ctx :user :collection))
-             (if-let [user (user/login (-> ctx :user :collection) (:login-creds ctx))]
+                      (-> ctx :user :database))
+             (if-let [user (user/login (-> ctx :user :database) (:login-creds ctx))]
                (do
                  (println user)
                  [true {:login user}])
@@ -116,7 +116,7 @@
   :respond-with-entity? true
   :handle-ok (fn [ctx]
                (let [specific-user (-> ctx :login)]
-                 (user/add-last-login (-> ctx :user :collection) specific-user)
+                 (user/add-last-login (-> ctx :user :database) specific-user)
                  (generate-string (-> ctx :login make-entity-json-friendly)))))
 
 (defresource change-values
@@ -137,7 +137,7 @@
   :authorized? ((:fn authorization) :user)
   :handle-unauthorized (:handle authorization)
   :exists? (fn [ctx]
-             (if-let [users (user/fetch (-> ctx :user :collection)
+             (if-let [users (user/fetch (-> ctx :user :database)
                                         (-> ctx :query)
                                         :multiple true)]
                [true {:query-result users}]
