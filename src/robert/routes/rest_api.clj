@@ -105,7 +105,6 @@
   :authorized? ((:fn authorization) :user)
   :handle-unauthorized (:handle authorization)
   :exists? (fn [ctx]
-             (println "exists??? key")
              (println (-> ctx :login-creds)
                       (-> ctx :user :database))
              (if-let [user (user/login (-> ctx :user :database) (:login-creds ctx))]
@@ -123,7 +122,7 @@
                  (generate-string (-> ctx :login make-entity-json-friendly)))))
 
 (defresource change-values
-  :allowed-methods #{:patch}
+  :allowed-methods #{:post}
   :available-media-types ["application/json"]
   :malformed? (fn [ctx]
                 (let [query (get-in ctx [:request :json-params "query"])

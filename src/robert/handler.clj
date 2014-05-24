@@ -25,6 +25,5 @@
 (def app (-> app-routes
              wrap-multipart-params
              wrap-json-params
-             handler/site
-             clojure.walk/keywordize-keys
+             handler/site ;;TODO add keywordize to the handler
              (wrap-trace :header :ui)))
