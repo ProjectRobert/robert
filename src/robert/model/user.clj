@@ -32,17 +32,16 @@
   (mc/find-maps (get-db connection database) "users" query))
 
 (defn fetch [database query & {:keys [multiple] :or [multiple false]}]
+  (println "fetch: =>" database query)
   (if multiple
     (mc/find-maps (get-db connection database) "users" query)
     (mc/find-one-as-map (get-db connection database) "users" query)))
 
-(defn- new-secure-code [database]
-  (first (filter #(unique? (get-db connection database) "users" {$or [{:activation_code %}
-                                            {:email_change_code %}
-                                            {:password_reset_code %}]})
-                 (repeatedly uuid))))
-
-(defn valid? [database user-data]
+(defn valid?
+  "Return true if the user data are valid.
+   The user data is valid if a password is present and is present or an email or an username.
+   Either email and username must be unique in the database."
+  [database user-data]
   (and (boolean (get user-data "password"))
        (let [email (get user-data "email")
              username (get user-data "username")]
@@ -65,7 +64,7 @@
     (if (creds/bcrypt-verify password (:password user))
       (mc/save-and-return (get-db connection database) "users"
                           (merge user
-                                 {:email_change_code (new-secure-code)
+                                 {:email_change_code (uuid)
                                   :email_change_code_created_at u/now
                                   :new_requested_email new-email}))
       (v/set-error :change-email :wrong-password))))
@@ -85,7 +84,7 @@
      (if (creds/bcrypt-verify password (:password user))
        (mc/save-and-return (get-db connection database) "users"
                            (merge user
-                                  {:password_reset_code (new-secure-code)
+                                  {:password_reset_code (uuid)
                                    :password_reset_code_created_at u/now
                                    :new_password_requested (creds/hash-bcrypt new-password)}))
       (v/set-error :change-password :wrong-password))))
@@ -109,7 +108,7 @@
         name (get user-data "username")
         password (get user-data "password")]
 
-    (let [activaction-code (new-secure-code database)
+    (let [activaction-code (uuid)
           user (mc/insert-and-return (get-db connection database) "users"
                                      (assoc user-data
                                        :password (creds/hash-bcrypt password)))]
@@ -117,8 +116,9 @@
 
 (defn verify-email! [database code]
   (if-let [user (mc/find-one-as-map (get-db connection database) "users" {:activation_code code})]
-    (mc/update-by-id (get-db connection database) "users" (:_id user) {$unset {:activation_code 1
-                                                     :activation_code_created_at 1}})
+    (mc/update-by-id (get-db connection database) "users"
+                     (:_id user) {$unset {:activation_code 1
+                                          :activation_code_created_at 1}})
     (v/set-error :code :not-valid-validation-code)))
 
 (defn remove! [database email]
@@ -139,7 +139,8 @@
             (dissoc user :password))))))
 
 (defn add-last-login [database user]
-  (mc/update-by-id (get-db connection database) "users" (:_id user) {$set {:last-login (t/now)}}))
+  (mc/update-by-id (get-db connection database) "users"
+                   (:_id user) {$set {:last-login (t/now)}}))
 
 (defn update-document
   ([database old-document delta]
