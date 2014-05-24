@@ -4,7 +4,7 @@ Open source Stormpath clone.
 
 User Management as a Service.
 
-The software is release under the [Eclipse Public License 1.0]
+The software is released under the [Eclipse Public License 1.0]
 
 For a quick overview of what you can or cannot do [TL;DR-eclipse-license]
 
@@ -12,31 +12,31 @@ For a quick overview of what you can or cannot do [TL;DR-eclipse-license]
 
 The point of the project is to provide an open source implementation of Stormpath.
 
-I really like the idea of Stormpath, it is just a pain to write every time you build an web app a new management system.
+I really like the idea of Stormpath, it is just a pain to write a new management system every time you build a web app.
 
-There is a lot of boilerplate code, stuff like change password, recover account, email verification, user roles etc... that you don't really want to write every time again and again...
+There is a lot of boilerplate code, stuff like change password, recover account, email verification, user roles etc... that you don't really want to write every time over and over again...
 
-Also there is a security concerned, if you are not an expert about web security chances are that you management system is going to just work, without too many thoughts about security itself.
+Also there is a security concern, if you are not an expert about web security chances are that your management system is going to just work, without too many thoughts about security itself.
 
-The idea of Stormpath is really great, they just do one, single things and they are great.
+The idea of Stormpath is great, they just do one, single thing and they are great.
 
 However I don't love the idea that the code of Stormpath is not open.
 
-Here is why of Project Robert
+Here is the reason of Project Robert
 
 ## The main idea
 
-The basic idea of Project Robert is too build a API that let developer manage user base very easily without too many concerned.
+The basic idea of Project Robert is to build an API that lets developers manage user base very easily without too many concerns.
 
 To establish a common ground I will use JSON-like as foundation, every user will be represented as a JSON document.
 
-This will give you more that enough flexibility to build whatever user base you need, plus it is a wide established standard, and every developer know what JSON is.
+This will give you more than enough flexibility to build whatever user base you need, plus it is a widly established standard, and all developers know what JSON is.
 
-For simplicity and velocity of development I will use MongoDB as persistent layer.
+For simplicity and velocity of development I will use MongoDB as a persistent layer.
 
-Every time a new application sign up I will create a new database in Mongo (for the SQL folks, databases in Mongo are comparable to tables).
+Every time a new application signs up I will create a new database in Mongo (for the SQL folks, databases in Mongo are comparable to tables).
 
-Every new user of the application will go in that database, as simple as it sound.
+Every new user of the application will go in that database, as simple as it sounds.
 
 Most common operation will be automated, stuff like change email or password or confirm a new email address.
 
@@ -44,21 +44,21 @@ Finally you can obviously query, change, and delete user using Robert as middle 
 
 ## Reason behind the technical choice
 
-Here are the reason of the main technical choice behind the project, Clojure and Mongo.
+Here are the reasons of the main technical choices behind the project, Clojure and Mongo.
 
 ### Robert is build in Clojure.
 
 The choice of clojure is pretty obvious for me since it is my language of choice, however I would like to explain why I think (and hope) it is a good choice.
 
-Clojure, as language, is very expressive and let you write very testable code, plus it help keep the complexity of the whole project as low as possible.
+Clojure, as language, is very expressive and allows you to write very testable code, plus it helps keep the complexity of the whole project as low as possible.
 
-Clojure is still a young language, the community is so formed by very curious and smart people, always willing to learn new thing, the right people to push forward so big open source project as Robert.
+Clojure is still a young language, the community is made up of very curious and smart people, always willing to learn new things, the right people that would push forward such a big open source project as Robert.
 
 ### Robert is backed by MongoDB
 
 Also the choice of Mongo was pretty obvious for me, but let me explain.
 
-Mongo is a wide standard, and every developer know JSON.
+Mongo is a wide standard, and all developers know JSON.
 
 Mongo is schema less, this provide the right flexibility to let every developer build its own user base without adding any code complexity to Robert itself.
 
@@ -75,7 +75,7 @@ If and when the revenue will grow up, I will start to either reward the main con
 
 Main contributors will have a discount on the use Robert itself.
 
-All the code product by Project Robert will be Open Source.
+All the code produced by Project Robert will be Open Source.
 
 
 ## State of the project
