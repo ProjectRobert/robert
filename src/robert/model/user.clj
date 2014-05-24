@@ -143,7 +143,9 @@
                    (:_id user) {$set {:last-login (t/now)}}))
 
 (defn update-document
-  ([database old-document delta]
-     (update-document database (merge old-document delta)))
-  ([database new-document]
-     (mc/save-and-return (get-db connection database) "users" new-document)))
+  [database query set & {:keys [multiple] :or [multiple false]}]
+  (println database (class database) query (class query) set (class set))
+  (mc/update (get-db connection database) "users"
+             query
+             set
+             {:multiple multiple}))

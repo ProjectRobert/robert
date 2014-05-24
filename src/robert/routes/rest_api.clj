@@ -12,6 +12,9 @@
 
 ;; I will keep unique the field :email and :username
 
+(def accepeted-query
+  #{"$set" "$unset" "$push" "$pushAll" "$addToSet" "$pull" "$pullAll"})
+
 (def authorization
   {:fn (fn [key] (fn [{req :request}]
                    (let [username (get-in req [:basic-authentication :username])
@@ -122,36 +125,34 @@
                  (generate-string (-> ctx :login make-entity-json-friendly)))))
 
 (defresource change-values
-  :allowed-methods #{:post}
+  :allowed-methods #{:put}
   :available-media-types ["application/json"]
   :malformed? (fn [ctx]
-                (let [query (get-in ctx [:request :json-params "query"])
-                      set-values (get-in ctx [:request :json-params "set"])]
-                  (cond
-                      (not query) [true {:malformed "It's necessary the key \"query\"."}]
-                      (not set-values) [true {:malformed "It's necessary the key \"set\""}]
-                      :else (cond
-                             (not (map? query)) [true {:malformed "The value of \"query\" must be a dictionary."}]
-                             (not (map? set-values)) [true {:malformed "The value of \"set\" must be a dictionary."}]
-                             :else [false {:query query :new-values set-values}]))))
+                (cond
+                 (not (get-in ctx [:request :json-params "query"]))
+                 [true {:malformed "It's necessary the key \"query\"."}]
+                 (not (some accepeted-query (-> ctx (get-in [:request :json-params]) keys)))
+                 [true {:malformed
+                        (str "It's necessary at least one of these keys:" accepeted-query)}]
+                 :else false))
   :handle-malformed (fn [ctx]
                       (generate-string (:malformed ctx)))
   :authorized? ((:fn authorization) :user)
   :handle-unauthorized (:handle authorization)
-  :exists? (fn [ctx]
-             (if-let [users (user/fetch (-> ctx :user :database)
-                                        (-> ctx :query)
-                                        :multiple true)]
-               [true {:query-result users}]
-               [false {:not-found {:message "Not found any element that satisfy the query."
-                                   :query (ctx :query)}}] ))
-  :handle-not-found (fn [ctx]
-                      (generate-string (:not-found ctx)))
   :new? false
-  :post! (fn [ctx])
+  :put! (fn [ctx]
+          (let [query (-> ctx
+                          (get-in [:request :json-params])
+                          (select-keys accepeted-query))
+                write-result (user/update-document (get-in ctx [:user :database])
+                                                   (get-in ctx [:request :json-params "query"])
+                                                   query
+                                                   :multiple true)]
+            {:result {:n (.getN write-result)
+                      :err (.getError write-result)}}))
   :respond-with-entity? true
   :handle-ok (fn [ctx]
-               (generate-string {:query (:query ctx) :new-values (:new-values ctx)})))
+               (-> ctx :result generate-string)))
 
 (defroutes confirm-code
   (GET "/validate/:code" [code]
@@ -196,6 +197,6 @@
   (ANY "/get-user" params get-user)
   (ANY "/new-user" params new-user)
   (ANY "/login" params login)
-  (PATCH "/set" params change-values)
+  (ANY "/set" params change-values)
   (context "/confirm" [] confirm-code)
   (context "/change" [] change))
