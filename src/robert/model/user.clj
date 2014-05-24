@@ -137,7 +137,8 @@
           (dissoc user :password)))))
 
 (defn add-last-login [database user]
-  (mc/update-by-id (get-db connection database) "users"
+  (mc/update-by-id (get-db connection database)
+                   "users"
                    (:_id user) {$set {:last-login (t/now)}}))
 
 (defn update-document

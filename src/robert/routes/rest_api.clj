@@ -105,13 +105,16 @@
   :authorized? ((:fn authorization) :user)
   :handle-unauthorized (:handle authorization)
   :exists? (fn [ctx]
+             (println "exists??? key")
              (println (-> ctx :login-creds)
                       (-> ctx :user :database))
              (if-let [user (user/login (-> ctx :user :database) (:login-creds ctx))]
                (do
-                 (println user)
+                 (println "login - exists? user =>" user)
                  [true {:login user}])
-               false))
+               (do
+                 (println "wrong exist")
+                 false)))
   :new? false
   :respond-with-entity? true
   :handle-ok (fn [ctx]
