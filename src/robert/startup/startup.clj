@@ -8,8 +8,9 @@
 (defn startup
   "Create a developer account, needed for the development process"
   []
-  (mc/insert-and-return
+  (mc/insert-and-return ;; todo upsert
    (get-db connection "robert")
    "users"
    {:username "dev"
-    :password (creds/hash-bcrypt "dev")}))
+    :password (creds/hash-bcrypt "dev")
+    :database "robert_db_dev"}))
