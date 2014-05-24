@@ -127,16 +127,14 @@
 (defn login [database creds-map]
   (println "model.user/login - database => " database)
   (println "model.user/login - creds-map => " creds-map)
-  (if (and (= (:username creds-map) "test")
-           (= (:password creds-map) "test"))
-    {:email "test" :database "test"}
-    (when-let [user (fetch database {$or
-                                       [{:username (get creds-map "username")}
-                                        {:email (get creds-map "email")}]})]
-      (println "model.user/login - user => " user)
-      (when (creds/bcrypt-verify (get creds-map "password") (:password user))
-        (do (println "ok")
-            (dissoc user :password))))))
+  (when-let [user (fetch database {$or
+                                   [{:username (get creds-map :username)}
+                                    {:email (get creds-map :email)}]})]
+    (println "model.user/login - user => " user)
+    (println "model.user/login - creds-map" creds-map)
+    (when (creds/bcrypt-verify (get creds-map :password) (:password user))
+      (do (println "ok")
+          (dissoc user :password)))))
 
 (defn add-last-login [database user]
   (mc/update-by-id (get-db connection database) "users"
