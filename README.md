@@ -80,6 +80,10 @@ All the code product by Project Robert will be Open Source.
 
 ## State of the project
 
+May 24th:
+* Migration from the old version of the MongoDB drivers that introduces some breaks
+* Now every user/web-app has it's own database and not collection anymore.
+
 May 1st:
 * First README ready and some play code.
 
