@@ -1,5 +1,6 @@
 (ns robert.test.model.user-test
-  (:require [monger.core :refer [connect! get-db set-db!]]
+  (:require
+   ;;[monger.core :refer [connect! get-db set-db!]]
             [monger.collection :as mc]
             
 ;;            [monger.test.manage-db :as manage]
@@ -7,7 +8,8 @@
 
             [robert.model.user :as user]))
 
-(connect!)
+;; (connect!)
+
 ;; (set-db! (get-db (:name data/main-document)))
 
 
