@@ -26,4 +26,5 @@
              wrap-multipart-params
              wrap-json-params
              handler/site
+             clojure.walk/keywordize-keys
              (wrap-trace :header :ui)))
