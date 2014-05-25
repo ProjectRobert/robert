@@ -116,4 +116,4 @@ The use and distribution terms for this software are covered by the [Eclipse Pub
 
 [Eclipse Public License 1.0]: http://opensource.org/licenses/eclipse-1.0.php
 [TL;DR-eclipse-license]: https://www.tldrlegal.com/l/epl
-[pmodoro]: https://github.com/siscia/robert/issues?labels=Pomodoro&page=1&state=open
+[pomodoro]: https://github.com/siscia/robert/issues?labels=Pomodoro&page=1&state=open
