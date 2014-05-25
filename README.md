@@ -77,7 +77,7 @@ Main contributors will have a discount on the use Robert itself.
 
 All the code produced by Project Robert will be Open Source.
 
-## Milestone
+## Pomodoros
 
 I would really like to make this a big community effort, in order to do so any contributors need to know what is necessary to do next.
 
@@ -86,6 +86,8 @@ I will keep a lot of issues open, any issues will be very small, without the nee
 Those issues will be label as ["Pomodoro"][pomodoro].
 
 Whoever can code some clojure should take less than 30 minutes to complete a "pomodoro" issues, otherwise it means that I wasn't able to manage the complexity of those issues.
+
+Also I will keep a [file][pomodoro-file] of some other not-necessary-code-related quick issues to solve, it is meant to be an auto referential file, however any input is very welcome.
 
 ## State of the project
 
@@ -117,3 +119,4 @@ The use and distribution terms for this software are covered by the [Eclipse Pub
 [Eclipse Public License 1.0]: http://opensource.org/licenses/eclipse-1.0.php
 [TL;DR-eclipse-license]: https://www.tldrlegal.com/l/epl
 [pomodoro]: https://github.com/siscia/robert/issues?labels=Pomodoro&page=1&state=open
+[pomodoro-file]: https://github.com/siscia/robert/blob/master/pomodoro.md
