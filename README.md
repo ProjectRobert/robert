@@ -77,6 +77,15 @@ Main contributors will have a discount on the use Robert itself.
 
 All the code produced by Project Robert will be Open Source.
 
+## Milestone
+
+I would really like to make this a big community effort, in order to do so any contributors need to know what is necessary to do next.
+
+I will keep a lot of issues open, any issues will be very small, without the need to understand completely and deeply the whole project, a fun 30 minutes of code.
+
+Those issues will be label as ["pomodoro"][pomodoro].
+
+Whoever can code some clojure should take less than 30 minutes to complete a "pomodoro" issues.
 
 ## State of the project
 
@@ -87,6 +96,18 @@ May 24th:
 May 1st:
 * First README ready and some play code.
 
+## Contributing
+
+Everybody is more than welcome to contribute to the project.
+
+Other than check the issues and the "pomodoris" for any task that can fit your skill.
+
+If you are a developer you can just fork and build whatever features you need or feel like.
+
+If you are a designer the project need a good looking home page, possible to be hosted on github.
+
+If you know English better than myself (and you probably do) you can just hunt for the several mistake I did.
+
 ## Copyright and License
 
 Copyright © 2014 Simone Mosciatti All right Reserved.
@@ -95,3 +116,4 @@ The use and distribution terms for this software are covered by the [Eclipse Pub
 
 [Eclipse Public License 1.0]: http://opensource.org/licenses/eclipse-1.0.php
 [TL;DR-eclipse-license]: https://www.tldrlegal.com/l/epl
+[pmodoro]: https://github.com/siscia/robert/issues?labels=Pomodoro&page=1&state=open
