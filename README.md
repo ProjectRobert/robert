@@ -42,6 +42,31 @@ Most common operation will be automated, stuff like change email or password or 
 
 Finally you can obviously query, change, and delete user using Robert as middle layer.
 
+
+## Pomodoros
+
+I would really like to make this a big community effort, in order to do so any contributors need to know what is necessary to do next.
+
+I will keep a lot of issues open, any issues will be very small, without the need to understand completely and deeply the whole project, a fun 30 minutes of code.
+
+Those issues will be label as ["Pomodoro"][pomodoro].
+
+Whoever can code some clojure should take less than 30 minutes to complete a "pomodoro" issues, otherwise it means that I wasn't able to manage the complexity of those issues.
+
+Also I will keep a [file][pomodoro-file] of some other not-necessary-code-related quick issues to solve, it is meant to be an auto referential file, however any input is very welcome.
+
+## Money and Open Source, Robert as a Social Experiment
+
+I am planning to sell the service, just like Stormpath does.
+
+If and when I will get enough revenue to sustain myself I will work on the project full time. (~3000 €/months)
+
+If and when the revenue will grow up, I will start to either reward the main contributors or hire someone full time.
+
+Main contributors will have a discount on the use Robert itself.
+
+All the code produced by Project Robert will be Open Source.
+
 ## Reason behind the technical choice
 
 Here are the reasons of the main technical choices behind the project, Clojure and Mongo.
@@ -63,31 +88,6 @@ Mongo is a wide standard, and all developers know JSON.
 Mongo is schema less, this provide the right flexibility to let every developer build its own user base without adding any code complexity to Robert itself.
 
 Mongo let you interface with a storage system in a very easy and quick way.
-
-
-## Money and Open Source, Robert as a Social Experiment
-
-I am planning to sell the service, just like Stormpath does.
-
-If and when I will get enough revenue to sustain myself I will work on the project full time. (~3000 €/months)
-
-If and when the revenue will grow up, I will start to either reward the main contributors or hire someone full time.
-
-Main contributors will have a discount on the use Robert itself.
-
-All the code produced by Project Robert will be Open Source.
-
-## Pomodoros
-
-I would really like to make this a big community effort, in order to do so any contributors need to know what is necessary to do next.
-
-I will keep a lot of issues open, any issues will be very small, without the need to understand completely and deeply the whole project, a fun 30 minutes of code.
-
-Those issues will be label as ["Pomodoro"][pomodoro].
-
-Whoever can code some clojure should take less than 30 minutes to complete a "pomodoro" issues, otherwise it means that I wasn't able to manage the complexity of those issues.
-
-Also I will keep a [file][pomodoro-file] of some other not-necessary-code-related quick issues to solve, it is meant to be an auto referential file, however any input is very welcome.
 
 ## State of the project
 
