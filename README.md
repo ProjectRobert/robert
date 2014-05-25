@@ -83,9 +83,9 @@ I would really like to make this a big community effort, in order to do so any c
 
 I will keep a lot of issues open, any issues will be very small, without the need to understand completely and deeply the whole project, a fun 30 minutes of code.
 
-Those issues will be label as ["pomodoro"][pomodoro].
+Those issues will be label as ["Pomodoro"][pomodoro].
 
-Whoever can code some clojure should take less than 30 minutes to complete a "pomodoro" issues.
+Whoever can code some clojure should take less than 30 minutes to complete a "pomodoro" issues, otherwise it means that I wasn't able to manage the complexity of those issues.
 
 ## State of the project
 
