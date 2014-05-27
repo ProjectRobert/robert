@@ -31,128 +31,128 @@
       (update-in [:_id] str)
       (dissoc :password "password")))
 
-(defresource get-user
-  :allowed-methods #{:get}
-  :available-media-types ["application/json"]
-  :malformed? (fn [ctx]
-                (let [q-params (get-in ctx [:request :query-params])]
-                  (if-let [email (get q-params "email")]
-                    [false {:query
-                            {:email email}}]
-                    (if-let [username (get q-params "username")]
-                      [false {:query
-                              {:username username}}]
-                      [true {:malformed {:message "You need to provide or the email or the username"}}]))))
-  :handle-malformed (fn [ctx]
-                      (generate-string (:malformed ctx)))
-  :authorized? ((:fn authorization) :user)
-  :handle-unauthorized (:handle authorization)
-  :exists? (fn [ctx]
-             (if-let [user (user/fetch (-> ctx :user :database)
-                                       (-> ctx :query))]
-               [true {:result user}]
-               false))
-  :handle-not-found (fn [ctx]
-                      (generate-string
-                       {:message (format "User not found")
-                        :query (:query ctx)}))
-  :handle-ok (fn [ctx]
-               (generate-string (-> ctx :result
-                                    make-entity-json-friendly) {:pretty-print true})))
+(def get-user
+  {:allowed-methods #{:get}
+   :available-media-types ["application/json"]
+   :malformed? (fn [ctx]
+                 (let [q-params (get-in ctx [:request :query-params])]
+                   (if-let [email (get q-params "email")]
+                     [false {:query
+                             {:email email}}]
+                     (if-let [username (get q-params "username")]
+                       [false {:query
+                               {:username username}}]
+                       [true {:malformed {:message "You need to provide or the email or the username"}}]))))
+   :handle-malformed (fn [ctx]
+                       (generate-string (:malformed ctx)))
+   :authorized? ((:fn authorization) :user)
+   :handle-unauthorized (:handle authorization)
+   :exists? (fn [ctx]
+              (if-let [user (user/fetch (-> ctx :user :database)
+                                        (-> ctx :query))]
+                [true {:result user}]
+                false))
+   :handle-not-found (fn [ctx]
+                       (generate-string
+                        {:message (format "User not found")
+                         :query (:query ctx)}))
+   :handle-ok (fn [ctx]
+                (generate-string (-> ctx :result
+                                     make-entity-json-friendly) {:pretty-print true}))})
 
-(defresource new-user
-  :allowed-methods #{:post}
-  :available-media-types ["application/json"]
-  :malformed? (fn [ctx]
-                (let [email (get-in ctx [:request :json-params "email"])
-                      pass (get-in ctx [:request :json-params "password"])]
-                  (if (nil? email)
-                    [true {:malformed {:message "Not providen requested field: email"}}]
-                    (if (nil? pass)
-                      [true {:malformed {:message "Not providen requested field: password"}}]
-                      false))))
-  :handle-malformed (fn [ctx]
-                      (generate-string (:malformed ctx)))
-  :authorized? ((:fn authorization) :user)
-  :handle-unauthorized (:handle authorization)
-  :allowed? (fn [ctx]
-              (let [database (get-in ctx [:user :database])
-                    new-username-email (get-in ctx [:request :json-params])]
-                (println database new-username-email)
-                (if (user/valid? database new-username-email)
-                  true
-                  [false {:forbidden {:message "Email already present"
-                                      :email new-username-email}}])))
-  :handle-forbidden (fn [ctx]
-                      (generate-string (:forbidden ctx)))
-  :post! (fn [ctx]
-           (let [user-data (get-in ctx [:request :json-params])
-                 database (get-in ctx [:user :database])]
-             {:created-user (user/new! database user-data)}))
-  :handle-created (fn [ctx]
-                    (generate-string (-> ctx :created-user
-                                         make-entity-json-friendly))))
+(def new-user
+  {:allowed-methods #{:post}
+   :available-media-types ["application/json"]
+   :malformed? (fn [ctx]
+                 (let [email (get-in ctx [:request :json-params "email"])
+                       pass (get-in ctx [:request :json-params "password"])]
+                   (if (nil? email)
+                     [true {:malformed {:message "Not providen requested field: email"}}]
+                     (if (nil? pass)
+                       [true {:malformed {:message "Not providen requested field: password"}}]
+                       false))))
+   :handle-malformed (fn [ctx]
+                       (generate-string (:malformed ctx)))
+   :authorized? ((:fn authorization) :user)
+   :handle-unauthorized (:handle authorization)
+   :allowed? (fn [ctx]
+               (let [database (get-in ctx [:user :database])
+                     new-username-email (get-in ctx [:request :json-params])]
+                 (println database new-username-email)
+                 (if (user/valid? database new-username-email)
+                   true
+                   [false {:forbidden {:message "Email already present"
+                                       :email new-username-email}}])))
+   :handle-forbidden (fn [ctx]
+                       (generate-string (:forbidden ctx)))
+   :post! (fn [ctx]
+            (let [user-data (get-in ctx [:request :json-params])
+                  database (get-in ctx [:user :database])]
+              {:created-user (user/new! database user-data)}))
+   :handle-created (fn [ctx]
+                     (generate-string (-> ctx :created-user
+                                          make-entity-json-friendly)))})
 
-(defresource login
-  :allowed-methods #{:post}
-  :available-media-types ["application/json"]
-  :malformed? (fn [ctx]
-                (let [user-value (get-in ctx [:request :json-params "login"])]
-                  (if (and (or (contains? user-value "email")
-                               (contains? user-value "username"))
-                           (contains? user-value "password"))
-                    [false {:login-creds user-value}]
-                    [true {:malformed {:message "You need to provide the key \"login\"."}}])))
-  :handle-malformed (fn [ctx]
-                      (generate-string (:malformed ctx)))
-  :authorized? ((:fn authorization) :user)
-  :handle-unauthorized (:handle authorization)
-  :exists? (fn [ctx]
-             (println (-> ctx :login-creds)
-                      (-> ctx :user :database))
-             (if-let [user (user/login (-> ctx :user :database) (:login-creds ctx))]
-               (do
-                 (println "login - exists? user =>" user)
-                 [true {:login user}])
-               (do
-                 (println "wrong exist")
-                 false)))
-  :new? false
-  :respond-with-entity? true
-  :handle-ok (fn [ctx]
-               (let [specific-user (-> ctx :login)]
-                 (user/add-last-login (-> ctx :user :database) specific-user)
-                 (generate-string (-> ctx :login make-entity-json-friendly)))))
+(def login
+  {:allowed-methods #{:post}
+   :available-media-types ["application/json"]
+   :malformed? (fn [ctx]
+                 (let [user-value (get-in ctx [:request :json-params "login"])]
+                   (if (and (or (contains? user-value "email")
+                                (contains? user-value "username"))
+                            (contains? user-value "password"))
+                     [false {:login-creds user-value}]
+                     [true {:malformed {:message "You need to provide the key \"login\"."}}])))
+   :handle-malformed (fn [ctx]
+                       (generate-string (:malformed ctx)))
+   :authorized? ((:fn authorization) :user)
+   :handle-unauthorized (:handle authorization)
+   :exists? (fn [ctx]
+              (println (-> ctx :login-creds)
+                       (-> ctx :user :database))
+              (if-let [user (user/login (-> ctx :user :database) (:login-creds ctx))]
+                (do
+                  (println "login - exists? user =>" user)
+                  [true {:login user}])
+                (do
+                  (println "wrong exist")
+                  false)))
+   :new? false
+   :respond-with-entity? true
+   :handle-ok (fn [ctx]
+                (let [specific-user (-> ctx :login)]
+                  (user/add-last-login (-> ctx :user :database) specific-user)
+                  (generate-string (-> ctx :login make-entity-json-friendly))))})
 
-(defresource change-values
-  :allowed-methods #{:put}
-  :available-media-types ["application/json"]
-  :malformed? (fn [ctx]
-                (cond
-                 (not (get-in ctx [:request :json-params "query"]))
-                 [true {:malformed "It's necessary the key \"query\"."}]
-                 (not (some accepeted-query (-> ctx (get-in [:request :json-params]) keys)))
-                 [true {:malformed
-                        (str "It's necessary at least one of these keys:" accepeted-query)}]
-                 :else false))
-  :handle-malformed (fn [ctx]
-                      (generate-string (:malformed ctx)))
-  :authorized? ((:fn authorization) :user)
-  :handle-unauthorized (:handle authorization)
-  :new? false
-  :put! (fn [ctx]
-          (let [query (-> ctx
-                          (get-in [:request :json-params])
-                          (select-keys accepeted-query))
-                write-result (user/update-document (get-in ctx [:user :database])
-                                                   (get-in ctx [:request :json-params "query"])
-                                                   query
-                                                   :multiple true)]
-            {:result {:n (.getN write-result)
-                      :err (.getError write-result)}}))
-  :respond-with-entity? true
-  :handle-ok (fn [ctx]
-               (-> ctx :result generate-string)))
+(def change-values
+  {:allowed-methods #{:put}
+   :available-media-types ["application/json"]
+   :malformed? (fn [ctx]
+                 (cond
+                  (not (get-in ctx [:request :json-params "query"]))
+                  [true {:malformed "It's necessary the key \"query\"."}]
+                  (not (some accepeted-query (-> ctx (get-in [:request :json-params]) keys)))
+                  [true {:malformed
+                         (str "It's necessary at least one of these keys:" accepeted-query)}]
+                  :else false))
+   :handle-malformed (fn [ctx]
+                       (generate-string (:malformed ctx)))
+   :authorized? ((:fn authorization) :user)
+   :handle-unauthorized (:handle authorization)
+   :new? false
+   :put! (fn [ctx]
+           (let [query (-> ctx
+                           (get-in [:request :json-params])
+                           (select-keys accepeted-query))
+                 write-result (user/update-document (get-in ctx [:user :database])
+                                                    (get-in ctx [:request :json-params "query"])
+                                                    query
+                                                    :multiple true)]
+             {:result {:n (.getN write-result)
+                       :err (.getError write-result)}}))
+   :respond-with-entity? true
+   :handle-ok (fn [ctx]
+                (-> ctx :result generate-string))})
 
 (defroutes confirm-code
   (GET "/validate/:code" [code]
@@ -194,9 +194,9 @@
 
 
 (defroutes robert
-  (ANY "/get-user" params get-user)
-  (ANY "/new-user" params new-user)
-  (ANY "/login" params login)
-  (ANY "/set" params change-values)
+  (ANY "/get-user" params (resource get-user))
+  (ANY "/new-user" params (resource new-user))
+  (ANY "/login" params (resource login))
+  (ANY "/set" params (resource change-values))
   (context "/confirm" [] confirm-code)
   (context "/change" [] change))
