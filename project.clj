@@ -18,6 +18,7 @@
   :ring {:handler robert.handler/app}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring-mock "0.1.5"]]}}
+                        [ring-mock "0.1.5"]
+                        [midje "1.6.2"]]}}
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"})
