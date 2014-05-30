@@ -38,4 +38,15 @@
     {:request {:json-params {"email" "foo"}}
      :user {:database "bar"}})
    => (just false (contains {:forbidden (just {:email {"email" "foo"} :message string?})}))
-     (provided (user/valid? "bar" {"email" "foo"}) => false))))
+   (provided (user/valid? "bar" {"email" "foo"}) => false)))
+
+ (facts
+  "Test post!"
+  (fact
+   "post! create a new entities nel db and return such entities under the key :created-user"
+   (let [return-user {:foo :bar}]
+     ((:post! r/new-user)
+      {:request {:json-params :foo}
+       :user {:database :bar}}) => {:created-user return-user}
+       (provided (user/new! :bar :foo) => return-user)))
+ ))
