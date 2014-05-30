@@ -144,6 +144,20 @@
    :handle-ok (fn [ctx]
                 (-> ctx :result generate-string))})
 
+(def validate-email
+  (fn [code]
+    {:allowed-methods #{:post}
+     :available-media-types ["application/json"]
+     :exists? (fn [ctx]
+                (let [verification (user/verify-email! code)]
+                  (cond
+                   (map? verification) [true {:result {:message "The user email is been validated"}}]
+                   (keyword? verificata) [false {:message {:message "The code is wrong"}}])))
+     :handle-ok (fn [ctx]
+                  (-> ctx :result generate-string))
+     :handle-not-found (fn [ctx]
+                         (-> ctx :result generate-string))}))
+
 (defroutes confirm-code
   (GET "/validate/:code" [code]
        (let [changed (user/verify-email! code)]
