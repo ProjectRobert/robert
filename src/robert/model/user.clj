@@ -119,7 +119,7 @@
     (mc/update-by-id (get-db connection database) "users"
                      (:_id user) {$unset {:activation_code 1
                                           :activation_code_created_at 1}})
-    (v/set-error :code :not-valid-validation-code)))
+    :not-valid-validation-code))
 
 (defn remove! [database email]
   (mc/remove (get-db connection database) "users" {:email email}))
