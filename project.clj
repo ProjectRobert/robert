@@ -4,6 +4,7 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/core.contracts "0.0.5"]
                  [compojure "1.1.6"]
+                 [bidi "1.10.2"]
                  [ring/ring-core "1.2.2"]
                  [ring/ring-json "0.3.1"]
                  [ring-basic-authentication "1.0.5"]
