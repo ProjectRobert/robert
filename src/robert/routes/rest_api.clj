@@ -32,33 +32,23 @@
       (dissoc :password "password")))
 
 (def get-user
-  {:allowed-methods #{:get}
-   :available-media-types ["application/json"]
-   :malformed? (fn [ctx]
-                 (let [q-params (get-in ctx [:request :query-params])]
-                   (if-let [email (get q-params "email")]
-                     [false {:query
-                             {:email email}}]
-                     (if-let [username (get q-params "username")]
-                       [false {:query
-                               {:username username}}]
-                       [true {:malformed {:message "You need to provide or the email or the username"}}]))))
-   :handle-malformed (fn [ctx]
-                       (generate-string (:malformed ctx)))
-   :authorized? ((:fn authorization) :user)
-   :handle-unauthorized (:handle authorization)
-   :exists? (fn [ctx]
-              (if-let [user (user/fetch (-> ctx :user :database)
-                                        (-> ctx :query))]
-                [true {:result user}]
-                false))
-   :handle-not-found (fn [ctx]
-                       (generate-string
-                        {:message (format "User not found")
-                         :query (:query ctx)}))
-   :handle-ok (fn [ctx]
-                (generate-string (-> ctx :result
-                                     make-entity-json-friendly) {:pretty-print true}))})
+  (fn [id]
+    {:allowed-methods #{:get}
+     :available-media-types ["application/json"]
+     :authorized? ((:fn authorization) :user)
+     :handle-unauthorized (:handle authorization)
+     :exists? (fn [ctx]
+                (if-let [user (user/fetch (-> ctx :user :database)
+                                          {:_id id})]
+                  [true {:result user}]
+                  false))
+     :handle-not-found (fn [ctx]
+                         (generate-string
+                          {:message (format "User not found")
+                           :query (:query ctx)}))
+     :handle-ok (fn [ctx]
+                  (generate-string (-> ctx :result
+                                       make-entity-json-friendly) {:pretty-print true}))}))
 
 (def new-user
   {:allowed-methods #{:post}
@@ -192,11 +182,11 @@
               (str "È stata mandata un email al nuovo indirizzo per confermare il cambio email"))
             "Problemi nel database"))))
 
-
 (defroutes robert
-  (ANY "/get-user" params (resource get-user))
+  (ANY "/get-user/:id" [id :as p] (resource (get-user id)))
   (ANY "/new-user" params (resource new-user))
   (ANY "/login" params (resource login))
   (ANY "/set" params (resource change-values))
+  (ANY "/test/:a/:b" [a b :as p] (fn [r] (str a b p)))
   (context "/confirm" [] confirm-code)
   (context "/change" [] change))
