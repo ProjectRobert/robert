@@ -48,5 +48,4 @@
      ((:post! r/new-user)
       {:request {:json-params :foo}
        :user {:database :bar}}) => {:created-user return-user}
-       (provided (user/new! :bar :foo) => return-user)))
- ))
+       (provided (user/new! :bar :foo) => return-user)))))
