@@ -13,7 +13,7 @@
                                  {:email_change_code (u/new-secure-code)
                                   :email_change_code_created_at u/now
                                   :new_requested_email new-email}))
-      (v/set-error :change-email :wrong-password))))
+      :wrong-password)))
 
 (defn change-email! [collection reset-code]
    (if-let [user (mc/find-one-as-map collection {:email_change_code
@@ -23,7 +23,7 @@
                 :$unset  {:email_change_code 1
                           :email_change_code_created_at 1
                           :new_requested_email 1}})
-     (v/set-error :code :not-valid-email-code)))
+     :not-valid-email-code))
 
 (defn ask-change-password! [collection id new-password password]
    (let [user (mc/find-map-by-id collection (ObjectId. id))]
@@ -43,4 +43,4 @@
                 :$unset {:password_reset_code 1
                          :password_reset_code_created_at 1
                          :new_password_requested 1}})
-    (v/set-error :code :not-valid-password-code)))
+    :not-valid-password-code))
