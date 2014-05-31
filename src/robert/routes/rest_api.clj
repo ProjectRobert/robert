@@ -188,7 +188,43 @@
 
 (def change-password
   {:allowed-methods #{:post}
-   :available-media-types ["application/json"]})
+   :available-media-types ["application/json"]
+   :malformed? (fn [ctx]
+                 (let [values (get-in ctx [:request :json-params])]
+                   (cond
+                    (nil? (get values "id" nil))
+                    [true {:malformed
+                           {:message "Need the key \"id\"."}}]
+                    (nil? (get values "old_password" nil))
+                    [true {:malformed
+                           {:message "Need the key \"old_password\"."}}]
+                    (nil? (get values "new_password" nil))
+                    [true {:malformed
+                           {:message "Need the key \"new_password\"."}}]
+                    :else [false {:id (get values "id")
+                                  :email (get values "email")
+                                  :new_password (get values "new_password")
+                                  :old_password (get values "old_password")}])))
+   :handle-malformed (fn [ctx]
+                       (generate-string (:malformed ctx)))
+   :authorized? ((:fn authorization) :user)
+   :handle-unauthorized (:handle authorization)
+   :exists? (fn [ctx]
+              (if-let [user (user/fetch (get-in ctx [:user :database])
+                                        {:id (:id ctx)})]
+                (if (creds/bcrypt-verify (:old_password ctx) (:crypted_password user))
+                  [true {:user-to-modify user}]
+                  [false {:not-exist {:message "The credentials \"id\" and \"old_password\" do not match."}}])
+                [false {:not-exist {:message "The credentials \"id\" and \"old_password\" do not match."}}]))
+   :existed? false :post-to-missing? false
+   :handle-not-found (fn [ctx] (generate-string (:not-exist ctx)))
+   :post! (fn [ctx]
+            (let [updated-user (prepare-change-password! (get-in ctx [:user :database])
+                                                         (:user-to-modify ctx)
+                                                         (:new_password ctx))]
+              {:updated-user updated-user}))
+   :handle-ok (fn [ctx]
+                (generate-string {:code (:password_reset_code (:updated-user ctx))}))})
 
 (def change-email
   {:allowed-methods #{:post}
