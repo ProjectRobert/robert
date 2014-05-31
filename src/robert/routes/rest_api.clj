@@ -186,6 +186,13 @@
      :handle-not-found (fn [ctx]
                          (-> ctx :result generate-string))}))
 
+(def change-password
+  {:allowed-methods #{:post}
+   :available-media-types ["application/json"]})
+
+(def change-email
+  {:allowed-methods #{:post}
+   :available-media-types ["application/json"]})
 
 (defroutes change
   (POST "/password" {p :params}
@@ -214,5 +221,4 @@
   (ANY "/validate/:code" [code] (resource (validate-email code)))
   (ANY "/validate/email/:code" [code] (resource (validate-email-code code)))
   (ANY "/validate/password/:code" [code] (resource (validate-password-code code)))
-  (context "/confirm" [] confirm-code)
   (context "/change" [] change))
