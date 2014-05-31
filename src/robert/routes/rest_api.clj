@@ -146,7 +146,7 @@
 
 (def validate-email
   (fn [code]
-    {:allowed-methods #{:post}
+    {:allowed-methods #{:get :post}
      :available-media-types ["application/json"]
      :exists? (fn [ctx]
                 (let [verification (user/verify-email! code)]
@@ -158,24 +158,34 @@
      :handle-not-found (fn [ctx]
                          (-> ctx :result generate-string))}))
 
-(defroutes confirm-code
-  (GET "/validate/:code" [code]
-       (let [changed (user/verify-email! code)]
-         (if (not (vali/get-errors :code))
-           "email verificata"
-           "il codice non esiste")))
-  
-  (GET "/email/:code" [code]
-       (let [changed (change-settings/change-email! code)]
-         (if (not (vali/get-errors :code))
-           "email cambiata"
-           "il codice non esiste")))
-  
-  (GET "/password/:code" [code]
-       (let [changed (change-settings/change-password! code)]
-         (if (not (vali/get-errors :code))
-           "password cambiata"
-           "il codice non esiste"))))
+(def validate-email-code
+  (fn [code]
+    {:allowed-methods #{:get :post}
+     :available-media-types ["application/json"]
+     :exists? (fn [ctx]
+                (let [verification (change-settings/change-email! code)]
+                  (cond
+                   (map? verification) [true {:result {:message "The email is been changed."}}]
+                   (keyword? verificata) [false {:message {:message "The validation code is wrong."}}])))
+     :handle-ok (fn [ctx]
+                  (-> ctx :result generate-string))
+     :handle-not-found (fn [ctx]
+                         (-> ctx :result generate-string))}))
+
+(def validate-password-code
+  (fn [code]
+    {:allowed-methods #{:get :post}
+     :available-media-types ["application/json"]
+     :exists? (fn [ctx]
+                (let [verification (change-settings/change-password! code)]
+                  (cond
+                   (map? verification) [true {:result {:message "The password is been changed."}}]
+                   (keyword? verificata) [false {:message {:message "The validation code is wrong."}}])))
+     :handle-ok (fn [ctx]
+                  (-> ctx :result generate-string))
+     :handle-not-found (fn [ctx]
+                         (-> ctx :result generate-string))}))
+
 
 (defroutes change
   (POST "/password" {p :params}
@@ -201,6 +211,8 @@
   (ANY "/new-user" params (resource new-user))
   (ANY "/login" params (resource login))
   (ANY "/set" params (resource change-values))
-  (ANY "/test/:a/:b" [a b :as p] (fn [r] (str a b p)))
+  (ANY "/validate/:code" [code] (resource (validate-email code)))
+  (ANY "/validate/email/:code" [code] (resource (validate-email-code code)))
+  (ANY "/validate/password/:code" [code] (resource (validate-password-code code)))
   (context "/confirm" [] confirm-code)
   (context "/change" [] change))
