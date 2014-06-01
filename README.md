@@ -70,11 +70,17 @@ Main contributors will have a discount on the use Robert itself.
 
 All the code produced by Project Robert will be Open Source.
 
+## Support Robert, Hire me
+
+I usually work for 100 $/hr, if you hire me trought Robert I will be very glad to work for 75 $/hr.
+
+Out of that, 35 $/hr will be for my expense, the other 35 $/hr will go to as bounty on the Robert's Pomodoros.
+
 ## Reason behind the technical choice
 
 Here are the reasons of the main technical choices behind the project, Clojure and Mongo.
 
-### Robert is build in Clojure.
+### Robert is build in Clojure
 
 The choice of clojure is pretty obvious for me since it is my language of choice, however I would like to explain why I think (and hope) it is a good choice.
 
