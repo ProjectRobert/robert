@@ -42,6 +42,9 @@ Most common operation will be automated, stuff like change email or password or 
 
 Finally you can obviously query, change, and delete user using Robert as middle layer.
 
+## Documentation
+
+The documentation of Robert can be found [here][doc]
 
 ## Pomodoros
 
@@ -120,3 +123,4 @@ The use and distribution terms for this software are covered by the [Eclipse Pub
 [TL;DR-eclipse-license]: https://www.tldrlegal.com/l/epl
 [pomodoro]: https://github.com/siscia/robert/issues?labels=Pomodoro&page=1&state=open
 [pomodoro-file]: https://github.com/siscia/robert/blob/master/pomodoro.md
+[doc]: http://docs.robert9.apiary.io/
