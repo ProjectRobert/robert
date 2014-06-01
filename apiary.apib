@@ -6,8 +6,8 @@ Robert, User Managment as a Service.
 
 # User
 
-
 ## User [/users]
+
 ### List all User [GET]
 + Response 200 (application/json)
 
@@ -18,6 +18,7 @@ Robert, User Managment as a Service.
         }]
 
 ### Create a User [POST]
+
 + Parameters
     + email (required, string, `foo@bar.com`) ... The user email.
     + password (required, string, `secret`) ... The user password in plain text.
@@ -39,12 +40,52 @@ Robert, User Managment as a Service.
           "email": "foo@bar.com",
           "other_key" : "any value"
         }
+        
+### Update a User [PATCH]
+
+All the value but query need to be preceded by a "$" please refer to the request example.
+Note that you can also refer to the MongoDB documentation.
+
++ Parameters
+    + query (required, map, `{<field>: <value1>}`) ... The query to find the element to modify.
+    + set (optional, map, `{<field1>: <value1>, <field2>: <value2>}`) ... What key set to what field.
+    + unset (optional, map, `{<field>: 1, <field2>: ""}`) ... Unset the values of the key <field>, doesn't touch the value of <field2>.
+    + push (optional, map, `{<array> : <value1>}`) ... Push the value on the the array.
+    + pushAll (optional, map,`{<array>: [<value1>, <value2>]`) ... Push all the values into the array.
+    + addToSet (optional, map, `{<set>: <value>}`) ... Add the element to the array if there is not one already.
+    + pull (optional, map, `{<arrayField> : <value>, <arrayField> : <query>}`) ... Remove the element who match the query.
+    + pop (optional, map, `{ <arrayField>: <-1 | 1> }`) ... Remove the first or the last element of the array.
+    
++ Request (application/json)
+
+        {
+         "query" : {"other_key": "any value"},
+         "$set" : {"foo": 3, "bar": 5},
+         "$unset" : {"other": 1, "foo": 0}, // unset the value of the key other, leave untouched the value of foo.
+         "$push" : {"array1": 5, "array2": "bar"},
+         "$pushAll" : {"array2": ["foo", 3]},
+         "$addToSet" : {"array1": "foo", "set2": {"$each" : ["woof", "bar", "meows"]},
+         "$pull" : {"array2": "meows"},
+         "$pop" : {"array2": 1, "array2": -1}
+        }
+        
++ Response 200 (application/json)
+
+        {
+        "_id": "48648689460",
+        "email": "foo@bar.com",
+        "other_key" : "any value",
+        "foo": 3,
+        "bar": 5,
+        "array1": ["foo"],
+        "array2": ["bar", "foo", 3],
+        }
 
 ## Note [/notes/{id}]
 A single Note object with all its details
 
 + Parameters
-    + id (required, number, `1`) ... Numeric `id` of the Note to perform action with. Has example value.
+    + id (required, number, `1`) ... Numeric `id` of the Note to perform action with. Has example value
 
 ### Retrieve a Note [GET]
 + Response 200 (application/json)
