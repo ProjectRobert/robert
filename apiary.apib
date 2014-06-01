@@ -18,6 +18,11 @@ Robert, User Managment as a Service.
         }]
 
 ### Create a User [POST]
++ Parameters
+    + email (required, string, `foo@bar.com`) ... The user email.
+    + password (required, string, `secret`) ... The user password in plain text.
+    + other_key (optional, string, `any value`) ... Any other key with any other values, you can put has many as you want here.
+
 + Request (application/json)
 
         { 
@@ -26,10 +31,6 @@ Robert, User Managment as a Service.
           "other_key": "any value"
         }
 
-+ Parameters
-    + email (required, string, `foo@bar.com`) ... The user email.
-    + password (required, string, `secret`) ... The user password in plain text.
-    + other_key (optional, string, `any value`) ... Any other key with any other values, you can put has many as you want here.
     
 + Response 201 (application/json)
 
