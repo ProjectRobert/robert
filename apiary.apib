@@ -2,26 +2,30 @@ FORMAT: 1A
 HOST: http://www.google.com
 
 # robert
-Notes API is a *short texts saving* service similar to its physical paper presence on your table.
+Robert, User Managment as a Service.
 
-# Group Notes
-Notes related resources of the **Notes API**
+# User
 
-## Notes Collection [/notes]
-### List all Notes [GET]
+
+## User [/users]
+### List all User [GET]
 + Response 200 (application/json)
 
         [{
-          "id": 1, "title": "Jogging in park"
+          "id": 1234, "email": "foo@bar", 
         }, {
-          "id": 2, "title": "Pick-up posters from post-office"
+          "id": 2314, "email": "bar@gmail.com"
         }]
 
-### Create a Note [POST]
+### Create a User [POST]
 + Request (application/json)
 
-        { "title": "Buy cheese and bread for breakfast." }
+        { "email": "foo@bar.com" }
 
++ Parameters
+	+ email (required, string, `foo@bar.com`) ... The user email
+	+ password (required, string, `secret`) ... The user password in plain text
+	
 + Response 201 (application/json)
 
         { "id": 3, "title": "Buy cheese and bread for breakfast." }
