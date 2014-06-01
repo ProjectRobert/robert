@@ -21,8 +21,8 @@
      (mc/update-by-id (get-db connection database) "users" (:_id user)
                {$set {:email (:new_requested_email user)}
                 $unset  {:email_change_code 1
-                          :email_change_code_created_at 1
-                          :new_requested_email 1}})
+                         :email_change_code_created_at 1
+                         :new_requested_email 1}})
      :not-valid-email-code))
 
 (defn prepare-change-password! [database user new-password]

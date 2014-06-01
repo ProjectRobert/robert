@@ -13,7 +13,7 @@
 ;; I will keep unique the field :email and :username
 
 (def accepeted-query
-  #{"$set" "$unset" "$push" "$pushAll" "$addToSet" "$pull" "$pullAll"})
+  #{"$set" "$unset" "$push" "$pushAll" "$addToSet" "$pull" "$pop"})
 
 (def authorization
   {:fn (fn [key] (fn [{req :request}]
@@ -87,12 +87,14 @@
   {:allowed-methods #{:post}
    :available-media-types ["application/json"]
    :malformed? (fn [ctx]
-                 (let [user-value (get-in ctx [:request :json-params "login"])]
-                   (if (and (or (contains? user-value "email")
-                                (contains? user-value "username"))
-                            (contains? user-value "password"))
-                     [false {:login-creds user-value}]
-                     [true {:malformed {:message "You need to provide the key \"login\"."}}])))
+                 (let [user-value (get-in ctx [:request :json-params])]
+                   (cond
+                    (not (or (contains? user-value "email")
+                             (contains? user-value "username")))
+                    [true {:malformed {:message "You need to provide or the key \"email\" or the key \"username\"."}}]
+                    (not (contains? user-value "password"))
+                    [true {:malformed {:message "You need to provide or the key \"password\""}}]
+                    :else [false {:login-creds user-value}])))
    :handle-malformed (fn [ctx]
                        (generate-string (:malformed ctx)))
    :authorized? ((:fn authorization) :user)
@@ -252,8 +254,8 @@
 (defroutes robert
   (ANY "/get-user/:id" [id :as p] (resource (get-user id)))
   (ANY "/new-user" params (resource new-user))
-  (ANY "/login" params (resource login))
   (ANY "/set" params (resource change-values))
+  (ANY "/login" params (resource login))
   (ANY "/validate/:code" [code] (resource (validate-email code)))
   (ANY "/validate/email/:code" [code] (resource (validate-email-code code)))
   (ANY "/validate/password/:code" [code] (resource (validate-password-code code)))
