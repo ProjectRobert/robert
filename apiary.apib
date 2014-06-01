@@ -20,9 +20,13 @@ Robert, User Managment as a Service.
 ### Create a User [POST]
 + Request (application/json)
 
-        { "email": "foo@bar.com" }
+        { 
+          "email": "foo@bar.com",
+          "password" : "secret"
+        }
 
 + Parameters
+    + email (required, string, `foo@bar.com`) ... The user email
     + password (required, string, `secret`) ... The user password in plain text
 
 + Response 201 (application/json)
