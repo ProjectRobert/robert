@@ -18,7 +18,6 @@ Robert, User Managment as a Service.
         }]
 
 ### Create a User [POST]
-
 + Parameters
     + email (required, string, `foo@bar.com`) ... The user email.
     + password (required, string, `secret`) ... The user password in plain text.
@@ -28,7 +27,8 @@ Robert, User Managment as a Service.
 
         { 
           "email": "foo@bar.com",
-          "password" : "secret",
+          "password": "secret",
+          "username": "Bob"
           "other_key": "any value"
         }
 
@@ -38,6 +38,7 @@ Robert, User Managment as a Service.
         {
           "_id": "48648689460",
           "email": "foo@bar.com",
+          "username": "Bob",
           "other_key" : "any value"
         }
         
@@ -72,13 +73,40 @@ Note that you can also refer to the MongoDB documentation.
 + Response 200 (application/json)
 
         {
-        "_id": "48648689460",
-        "email": "foo@bar.com",
-        "other_key" : "any value",
-        "foo": 3,
-        "bar": 5,
-        "array1": ["foo"],
-        "array2": ["bar", "foo", 3],
+         "_id": "48648689460",
+         "email": "foo@bar.com",
+         "username": "Bob",
+         "other_key" : "any value",
+         "foo": 3,
+         "bar": 5,
+         "array1": ["foo"],
+         "array2": ["bar", "foo", 3],
+        }
+
+## Login [/users/login]
+
+### Make the login of the User [POST]
+Need to provide or the password or the username.
+
++ Parameters
+    + password (required, string, `secret`) ... The password of the user.
+    + username (optional, string, `Bob`) ... The username of the user.
+    + email (optional, string, `foo@bar.com`) ... The email of the user.
+
++ Request (application/json)
+
+        {
+         "email": "foo@bar.com",
+         "password": "secret"
+        }
+
++ Response 200 (application/json)
+
+        {
+          "_id": "48648689460",
+          "email": "foo@bar.com",
+          "username": "Bob",
+          "other_key" : "any value"
         }
 
 ## Note [/notes/{id}]
