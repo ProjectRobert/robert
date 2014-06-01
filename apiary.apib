@@ -22,16 +22,22 @@ Robert, User Managment as a Service.
 
         { 
           "email": "foo@bar.com",
-          "password" : "secret"
+          "password" : "secret",
+	  "other_key": "any value"
         }
 
 + Parameters
-    + email (required, string, `foo@bar.com`) ... The user email
-    + password (required, string, `secret`) ... The user password in plain text
-
+    + email (required, string, `foo@bar.com`) ... The user email.
+    + password (required, string, `secret`) ... The user password in plain text.
+    + other_key (optional, string, `any value`) ... Any other key with any other values, you can put has many as you want here.
+    
 + Response 201 (application/json)
 
-        { "id": 3, "title": "Buy cheese and bread for breakfast." }
+        {
+          ""_id": "48648689460",
+          "email": "foo@bar.com",
+	  "other_key" : "any value"
+	}
 
 ## Note [/notes/{id}]
 A single Note object with all its details
